@@ -1,6 +1,14 @@
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const USER_CONFIG = {
+  email: process.env.NAUKRI_EMAIL || 'your_email@example.com',
+  password: process.env.NAUKRI_PASSWORD || 'your_password'
+};
 
 const getFlagFilePath = () => path.join(__dirname, 'upload_flag.txt');
 
@@ -10,16 +18,16 @@ const getFileToUpload = (): string => {
 
   if (fs.existsSync(flagFilePath)) {
     const flag = fs.readFileSync(flagFilePath, 'utf-8').trim();
-    if (flag === 'CV') {
-      nextFile = 'Jakir_Husain_Resume.pdf';
-      fs.writeFileSync(flagFilePath, 'Resume');
+    if (flag === 'CV1') {
+      nextFile = 'jakir_3.6yrs_exp_qa_automation.pdf';
+      fs.writeFileSync(flagFilePath, 'CV2');
     } else {
-      nextFile = 'Jakir_Husain_CV.pdf';
-      fs.writeFileSync(flagFilePath, 'CV');
+      nextFile = 'Jakir_3.6yrs.Exp_QA_Automation.pdf';
+      fs.writeFileSync(flagFilePath, 'CV1');
     }
   } else {
-    nextFile = 'Jakir_Husain_CV.pdf';
-    fs.writeFileSync(flagFilePath, 'CV');
+    nextFile = 'jakir_3.6yrs_exp_qa_automation.pdf';
+    fs.writeFileSync(flagFilePath, 'CV2');
   }
 
   return path.join(__dirname, 'file', nextFile);
@@ -31,8 +39,8 @@ test('naukri cv upload', async ({ page }) => {
   await expect(page).toHaveTitle("Jobseeker's Login: Search the Best Jobs available in India & Abroad - Naukri.com");
   await page.locator("#login_Layer").click();
   await page.waitForSelector("#usernameField")
-  await page.locator("#usernameField").pressSequentially("jakirh641@gmail.com",{delay:100})
-  await page.locator("#passwordField").fill("Mother65@")
+  await page.locator("#usernameField").pressSequentially(USER_CONFIG.email, {delay:100})
+  await page.locator("#passwordField").fill(USER_CONFIG.password)
   await page.locator("//button[text()='Login']").click()
   await page.locator("//a[text()='View']").click()
 
