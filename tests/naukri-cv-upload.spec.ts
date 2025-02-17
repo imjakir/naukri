@@ -12,27 +12,41 @@ const USER_CONFIG = {
   cv2: process.env.CV2_NAME || 'resume2.pdf'
 };
 
-const getFlagFilePath = () => path.join(__dirname, 'upload_flag.txt');
+const FILES = {
+  CV1: process.env.CV1_NAME || 'default_cv1.pdf',
+  CV2: process.env.CV2_NAME || 'default_cv2.pdf'
+} as const;
 
-const getFileToUpload = (): string => {
-  const flagFilePath = getFlagFilePath();
-  let nextFile: string;
-
-  if (fs.existsSync(flagFilePath)) {
-    const flag = fs.readFileSync(flagFilePath, 'utf-8').trim();
-    if (flag === 'CV1') {
-      nextFile = 'jakir_3.6yrs_exp_qa_automation.pdf';
-      fs.writeFileSync(flagFilePath, 'CV2');
-    } else {
-      nextFile = 'Jakir_3.6yrs.Exp_QA_Automation.pdf';
-      fs.writeFileSync(flagFilePath, 'CV1');
-    }
-  } else {
-    nextFile = 'jakir_3.6yrs_exp_qa_automation.pdf';
-    fs.writeFileSync(flagFilePath, 'CV2');
+const getUploadedFileName = async (page: any): Promise<string | null> => {
+  try {
+    const uploadedFileElement = await page.locator('.resume-name-inline .truncate');
+    return await uploadedFileElement.getAttribute('title');
+  } catch (error) {
+    return null;
   }
+};
 
-  return path.join(__dirname, 'file', nextFile);
+const getNextFileToUpload = async (page: any): Promise<string> => {
+  const currentUploadedFile = await getUploadedFileName(page);
+  
+  if (!currentUploadedFile) {
+    return FILES.CV1 || 'default_cv1.pdf';
+  }
+  
+  // If CV1 is uploaded, return CV2, and vice versa
+  return currentUploadedFile === FILES.CV1 ? FILES.CV2 : FILES.CV1;
+};
+
+const uploadPdfFile = async (page: any, fileName: string) => {
+  const fileInput = await page.locator("#attachCV");
+  const fileToUpload = path.join(__dirname, 'file', fileName);
+  
+  if (!fs.existsSync(fileToUpload)) {
+    throw new Error(`File not found: ${fileName}`);
+  }
+  
+  await fileInput.setInputFiles(fileToUpload);
+  console.log(`Uploading file: ${fileName}`);
 };
 
 test('naukri cv upload', async ({ page }) => {
@@ -40,15 +54,15 @@ test('naukri cv upload', async ({ page }) => {
 
   await expect(page).toHaveTitle("Jobseeker's Login: Search the Best Jobs available in India & Abroad - Naukri.com");
   await page.locator("#login_Layer").click();
-  await page.waitForSelector("#usernameField")
-  await page.locator("#usernameField").pressSequentially(USER_CONFIG.email, {delay:100})
-  await page.locator("#passwordField").fill(USER_CONFIG.password)
-  await page.locator("//button[text()='Login']").click()
-  await page.locator("//a[text()='View']").click()
+  await page.waitForSelector("#usernameField");
+  await page.locator("#usernameField").pressSequentially(USER_CONFIG.email, { delay: 100 });
+  await page.locator("#passwordField").fill(USER_CONFIG.password);
+  await page.locator("//button[text()='Login']").click();
+  await page.locator("//a[text()='View']").click();
 
-  const fileInput = await page.locator("#attachCV");
-  const fileToUpload = getFileToUpload();
-  await fileInput.setInputFiles(fileToUpload);
+  // Get and upload the next file
+  const fileToUpload = await getNextFileToUpload(page);
+  await uploadPdfFile(page, fileToUpload);
   
   await page.waitForTimeout(2000);
   await page.close();
