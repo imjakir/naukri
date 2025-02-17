@@ -4,3 +4,10 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 .env
+# Ignore PDF files in the test/file directory (case insensitive)
+[Tt]ests/[Ff]ile/**/*.pdf
+tests/file/**/*.PDF
+
+
+# But keep the directory structure
+!tests/file/.gitkeep
