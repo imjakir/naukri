@@ -7,7 +7,9 @@ dotenv.config();
 
 const USER_CONFIG = {
   email: process.env.NAUKRI_EMAIL || 'your_email@example.com',
-  password: process.env.NAUKRI_PASSWORD || 'your_password'
+  password: process.env.NAUKRI_PASSWORD || 'your_password',
+  cv1: process.env.CV1_NAME || 'resume1.pdf',
+  cv2: process.env.CV2_NAME || 'resume2.pdf'
 };
 
 const getFlagFilePath = () => path.join(__dirname, 'upload_flag.txt');
