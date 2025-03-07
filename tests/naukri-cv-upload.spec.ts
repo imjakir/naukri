@@ -28,11 +28,11 @@ const getUploadedFileName = async (page: any): Promise<string | null> => {
 
 const getNextFileToUpload = async (page: any): Promise<string> => {
   const currentUploadedFile = await getUploadedFileName(page);
-  
+
   if (!currentUploadedFile) {
     return FILES.CV1 || 'default_cv1.pdf';
   }
-  
+
   // If CV1 is uploaded, return CV2, and vice versa
   return currentUploadedFile === FILES.CV1 ? FILES.CV2 : FILES.CV1;
 };
@@ -40,11 +40,11 @@ const getNextFileToUpload = async (page: any): Promise<string> => {
 const uploadPdfFile = async (page: any, fileName: string) => {
   const fileInput = await page.locator("#attachCV");
   const fileToUpload = path.join(__dirname, 'file', fileName);
-  
+
   if (!fs.existsSync(fileToUpload)) {
     throw new Error(`File not found: ${fileName}`);
   }
-  
+
   await fileInput.setInputFiles(fileToUpload);
   console.log(`Uploading file: ${fileName}`);
 };
@@ -63,7 +63,50 @@ test('naukri cv upload', async ({ page }) => {
   // Get and upload the next file
   const fileToUpload = await getNextFileToUpload(page);
   await uploadPdfFile(page, fileToUpload);
-  
   await page.waitForTimeout(2000);
+
+  const careerProfileEditButton = page.locator("//span[text()='Career profile']/following-sibling::span");
+  const selectedLocationCrossButton = page.locator("//a[.='Cross']")
+  const saveButton = page.locator("#saveDesiredProfile")
+  const preferredWorkLocationInputField = page.locator("#locationSugg")
+  const quickLinkCareerProfile = page.locator("//div[@class='card quickLink sticky']//span[.='Career profile']")
+  const worklocationText = page.locator("//span[normalize-space()='Preferred work location (Max 10)']")
+
+  // Click career profile edit button and wait for the form to be visible
+  await page.mouse.wheel(0, 500)
+  await quickLinkCareerProfile.click();
+  await careerProfileEditButton.click();
+  await preferredWorkLocationInputField.waitFor({ state: 'visible' });
+
+  // Remove existing locations
+  while (await selectedLocationCrossButton.count() > 0) {
+    await selectedLocationCrossButton.first().click();
+  }
+
+  //click on preferredWorkLocationInputField
+  await preferredWorkLocationInputField.click({ delay: 100 })
+  await preferredWorkLocationInputField.pressSequentially("bhubaneswar", { delay: 100 });
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await preferredWorkLocationInputField.click({ delay: 100 })
+  // Add new locations
+  const textsToCheck = ["Remote", "Pune", "Kolkata", "Bengaluru", "Hyderabad",];
+
+  for (const text of textsToCheck) {
+    const element = page.locator('li.sugTouple.UnChecked', { hasText: text });
+
+    if (await element.count() > 0) {
+      console.log(`✅ '${text}' exists.`);
+      await element.click(); // Click if found
+    } else {
+      console.log(`❌ '${text}' is missing.`);
+    }
+  }
+
+  // Save the changes and wait for success indication
+  await worklocationText.click()
+  await saveButton.click();
+
   await page.close();
 });
