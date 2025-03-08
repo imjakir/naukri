@@ -98,6 +98,7 @@ test('naukri cv upload', async ({ page }) => {
 
     if (await element.count() > 0) {
       console.log(`✅ '${text}' exists.`);
+      await element.isVisible()
       await element.click(); // Click if found
     } else {
       console.log(`❌ '${text}' is missing.`);
