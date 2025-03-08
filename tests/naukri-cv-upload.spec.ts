@@ -83,15 +83,19 @@ test('naukri cv upload', async ({ page }) => {
     await selectedLocationCrossButton.first().click();
   }
 
-  //click on preferredWorkLocationInputField
-  // await preferredWorkLocationInputField.click({ delay: 100 })
-  // await preferredWorkLocationInputField.pressSequentially("bhubaneswar", { delay: 100 });
-  // await page.keyboard.press('ArrowDown');
-  // await page.keyboard.press('ArrowDown');
-  // await page.keyboard.press('Enter');
-  await preferredWorkLocationInputField.click({ delay: 100 })
   // Add new locations
-  const textsToCheck = ["Remote", "Pune", "Kolkata", "Bengaluru", "Hyderabad",];
+  const locations = ['Bengaluru', 'kolkata', 'bhubaneswar', 'hyderabad'];
+  for (const location of locations) {
+    await preferredWorkLocationInputField.pressSequentially(location,{delay:200});
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    
+  }
+  
+  // Add new locations method 2
+  await preferredWorkLocationInputField.click()
+  const textsToCheck = ["Remote", "pune"];
 
   for (const text of textsToCheck) {
     const element = page.locator('li.sugTouple.UnChecked', { hasText: text });
