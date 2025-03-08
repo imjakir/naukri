@@ -104,9 +104,9 @@ test('naukri cv upload', async ({ page }) => {
     const element = page.locator('li.sugTouple.UnChecked', { hasText: text });
 
     if (await element.count() > 0) {
-      console.log(`✅ '${text}' exists.`);
       await element.waitFor({state:'visible'})
       await element.click(); // Click if found
+      console.log(`✅ '${text}' exists.`);
     } else {
       console.log(`❌ '${text}' is missing.`);
     }
