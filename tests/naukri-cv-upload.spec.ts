@@ -86,14 +86,17 @@ test('naukri cv upload', async ({ page }) => {
   // Add new locations
   const locations = ['Bengaluru', 'kolkata', 'bhubaneswar', 'hyderabad'];
   for (const location of locations) {
-    await preferredWorkLocationInputField.pressSequentially(location,{delay:200});
+    await preferredWorkLocationInputField.pressSequentially(location, { delay: 200 });
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Enter');
-    
+
   }
-  
+  await saveButton.click();
+
   // Add new locations method 2
+  await careerProfileEditButton.click();
+  await preferredWorkLocationInputField.waitFor({ state: 'visible' });
   await preferredWorkLocationInputField.click()
   const textsToCheck = ["Remote", "pune"];
 
@@ -112,6 +115,5 @@ test('naukri cv upload', async ({ page }) => {
   // Save the changes and wait for success indication
   await worklocationText.click()
   await saveButton.click();
-
   await page.close();
 });
