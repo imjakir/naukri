@@ -89,7 +89,7 @@ test('naukri cv upload', async ({ page }) => {
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
-  await preferredWorkLocationInputField.click({ delay: 100 })
+  await preferredWorkLocationInputField.click({ delay: 5000 })
   // Add new locations
   const textsToCheck = ["Remote", "Pune", "Kolkata", "Bengaluru", "Hyderabad",];
 
